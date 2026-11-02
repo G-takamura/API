@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: Product Catalog API
+  version: 1.0.0
+  description: 商品の検索および一覧取得を行うAPI定義
+paths:
+  /products:
+    get:
+      summary: 商品一覧の検索・取得
+      operationId: listProducts
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: 商品名やカテゴリの部分一致検索文字列
+          schema:
+            type: string
+            example: キーボード
+        - name: page
+          in: query
+          required: false
+          description: 取得するページ番号
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          description: 1ページあたりの取得件数
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  pagination:
+                    type: object
+                    properties:
+                      totalCount:
+                        type: integer
+                        example: 105
+                      currentPage:
+                        type: integer
+                        example: 1
+                      totalPages:
+                        type: integer
+                        example: 6
+
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d3b07384-d113-4c4d-9c86-123456789abc
+        name:
+          type: string
+          example: ワイヤレスメカニカルキーボード
+        price:
+          type: integer
+          example: 14800
+        inStock:
+          type: boolean
+          example: true
