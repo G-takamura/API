@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: Secure Note API
+  version: 1.0.0
+  description: JWTによるBearer認証が必要なAPI定義
+paths:
+  /auth/login:
+    post:
+      summary: 認証トークン発行
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: user01
+                password:
+                  type: string
+                  format: password
+                  example: secret12345
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: 認証情報が不正です
+
+  /notes:
+    get:
+      summary: ユーザーのメモ一覧取得（認証必須）
+      operationId: getNotes
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    content:
+                      type: string
+                      example: 買い物リスト
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    UnauthorizedError:
+      description: 認証トークンが無効または未指定
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized access
